@@ -15,6 +15,25 @@
                     <x-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
                         {{ __('Dashboard') }}
                     </x-nav-link>
+                    <x-nav-link :href="route('tickets.index')" :active="request()->routeIs('tickets.*')">
+                        {{ __('Тикеты') }}
+                    </x-nav-link>
+
+                    @php
+                        $role = auth()->user()->role->name;
+                    @endphp
+
+                    @if(in_array($role, ['agent', 'admin']))
+                        <x-nav-link :href="route('tickets.index')">
+                            {{ __('Все тикеты') }}
+                        </x-nav-link>
+                    @endif
+
+                    @if($role === 'admin')
+                        <x-nav-link :href="route('categories.index')" :active="request()->routeIs('categories.*')">
+                            {{ __('Категории') }}
+                        </x-nav-link>
+                    @endif
                 </div>
             </div>
 
