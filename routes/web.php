@@ -40,6 +40,20 @@ Route::post('/tickets/{ticket}/comments', [CommentController::class, 'store'])
     ->name('comments.store')
     ->middleware('auth');
 
+Route::middleware('auth')->group(function () {
+
+    Route::post('/tickets/{ticket}/take', [TicketController::class, 'take'])
+        ->name('tickets.take');
+
+    Route::post('/tickets/{ticket}/status', [TicketController::class, 'updateStatus'])
+        ->name('tickets.status');
+
+    Route::post('/tickets/{ticket}/close', [TicketController::class, 'close'])
+        ->name('tickets.close');
+
+});
+
+
 
 require __DIR__.'/auth.php';
 

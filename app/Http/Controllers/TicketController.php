@@ -55,8 +55,57 @@ class TicketController extends Controller
             abort(403);
         
 
-        $ticket->load(['comments.user', 'category']);
+        $ticket->load(['comments.user', 'category', 'agent']);
 
         return view('tickets.show', compact('ticket'));
     }
+    public function take(Ticket $ticket)
+    {
+        $user = Auth::user();
+
+        if (!in_array($user->role->name, ['agent', 'admin'])) 
+            abort(403);
+        
+
+        $ticket->update([
+            'agent_id' => $user->id,
+            'status' => 'in_progress',
+        ]);
+
+        return redirect()->route('tickets.show', $ticket);
+    }
+    public function updateStatus(Request $request, Ticket $ticket)
+    {
+        $user = Auth::user();
+
+        if (!in_array($user->role->name, ['agent', 'admin'])) {
+            abort(403);
+        }
+
+        $request->validate([
+            'status' => 'required|in:open,in_progress,waiting_user,closed',
+        ]);
+
+        $ticket->update([
+            'status' => $request->status,
+        ]);
+
+        return redirect()->route('tickets.show', $ticket);
+    }
+    public function close(Ticket $ticket)
+    {
+        $user = Auth::user();
+
+        if ($ticket->user_id !== $user->id) {
+            abort(403);
+        }
+
+        $ticket->update([
+            'status' => 'closed',
+        ]);
+
+        return redirect()->route('tickets.show', $ticket);
+    }
+
+
 }
