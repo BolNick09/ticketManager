@@ -9,7 +9,11 @@
         <ul>
             @foreach ($tickets as $ticket)
                 <li>
-                    <strong>{{ $ticket->subject }}</strong><br>
+                    <strong>
+                        <a href="{{ route('tickets.show', $ticket) }}">
+                            {{ $ticket->subject }}
+                        </a>
+                    </strong><br>
                     Категория: {{ $ticket->category->name }}<br>
                     Статус: {{ $ticket->status }}
                 </li>

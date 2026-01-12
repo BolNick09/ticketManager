@@ -13,11 +13,11 @@ class TicketController extends Controller
     {
         $user = Auth::user();
 
-        if ($user->role->name === 'user') {
+        if ($user->role->name === 'user') 
             $tickets = Ticket::where('user_id', $user->id)->get();
-        } else {
+        else 
             $tickets = Ticket::all();
-        }
+        
 
         return view('tickets.index', compact('tickets'));
     }
@@ -45,5 +45,18 @@ class TicketController extends Controller
         ]);
 
         return redirect()->route('tickets.index');
+    }
+
+    public function show(Ticket $ticket)
+    {
+        $user = Auth::user();
+
+        if ($user->role->name === 'user' && $ticket->user_id !== $user->id) 
+            abort(403);
+        
+
+        $ticket->load(['comments.user', 'category']);
+
+        return view('tickets.show', compact('ticket'));
     }
 }
