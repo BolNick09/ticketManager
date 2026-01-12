@@ -58,6 +58,10 @@ Route::get('/dashboard', [DashboardController::class, 'index'])
     ->name('dashboard');
 
 
+Route::post('/tickets/{ticket}/assign-agent', [TicketController::class, 'assignAgent'])
+    ->name('tickets.assignAgent')
+    ->middleware('auth');
+
 require __DIR__.'/auth.php';
 
 

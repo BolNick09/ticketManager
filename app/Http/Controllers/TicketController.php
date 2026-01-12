@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Models\Ticket;
 use App\Models\Category;
 use Illuminate\Support\Facades\Auth;
+use App\Models\User;
 
 class TicketController extends Controller
 {
@@ -57,7 +58,15 @@ class TicketController extends Controller
 
         $ticket->load(['comments.user', 'category', 'agent']);
 
-        return view('tickets.show', compact('ticket'));
+        $agents = [];
+
+        if (Auth::user()->role->name === 'admin') {
+            $agents = User::whereHas('role', function ($q) {
+                $q->where('name', 'agent');
+            })->get();
+}
+
+return view('tickets.show', compact('ticket', 'agents'));
     }
     public function take(Ticket $ticket)
     {
@@ -106,6 +115,31 @@ class TicketController extends Controller
 
         return redirect()->route('tickets.show', $ticket);
     }
+    public function assignAgent(Request $request, Ticket $ticket)
+{
+    $user = Auth::user();
+
+    if ($user->role->name !== 'admin') {
+        abort(403);
+    }
+
+    $request->validate([
+        'agent_id' => 'required|exists:users,id',
+    ]);
+
+    $agent = User::findOrFail($request->agent_id);
+
+    if ($agent->role->name !== 'agent') {
+        abort(403);
+    }
+
+    $ticket->update([
+        'agent_id' => $agent->id,
+        'status' => 'in_progress',
+    ]);
+
+    return redirect()->route('tickets.show', $ticket);
+}
 
 
 }

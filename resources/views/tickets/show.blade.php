@@ -1,104 +1,134 @@
+
 <x-app-layout>
+
+    <link rel="stylesheet" href="{{ asset('css/ticket.css') }}">   
+
     <x-slot name="header">
         <h2>{{ $ticket->subject }}</h2>
     </x-slot>
 
-    <div class="p-4">
+    @php
+        $role = auth()->user()->role->name;
 
-        {{-- Основная информация --}}
-        <p><strong>Категория:</strong> {{ $ticket->category->name }}</p>
+        $statusLabels = [
+            'open' => 'Открыт',
+            'in_progress' => 'В работе',
+            'waiting_user' => 'Ожидает пользователя',
+            'closed' => 'Закрыт',
+        ];
+    @endphp
 
-        <p>
-            <strong>Статус:</strong>
-            @switch($ticket->status)
-                @case('open') Открыт @break
-                @case('in_progress') В работе @break
-                @case('waiting_user') Ожидает ответа пользователя @break
-                @case('closed') Закрыт @break
-                @default {{ $ticket->status }}
-            @endswitch
-        </p>
+    <div class="ticket-card">
 
-        <p>
-            <strong>Агент:</strong>
-            {{ $ticket->agent?->name ?? 'Не назначен' }}
-        </p>
+        {{-- Мета-информация --}}
+        <div class="ticket-meta">
+            <div>
+                <strong>Категория</strong><br>
+                {{ $ticket->category->name }}
+            </div>
 
-        <hr>
+            <div>
+                <strong>Статус</strong><br>
+                <span class="status status-{{ $ticket->status }}">
+                    {{ $statusLabels[$ticket->status] ?? $ticket->status }}
+                </span>
+            </div>
 
-        <p><strong>Описание:</strong></p>
-        <p>{{ $ticket->description }}</p>
+            <div>
+                <strong>Агент</strong><br>
+                {{ $ticket->agent?->name ?? 'Не назначен' }}
+            </div>
+        </div>
 
-        <hr>
+        {{-- Описание --}}
+        <div class="ticket-description">
+            <strong>Описание</strong>
+            <p>{{ $ticket->description }}</p>
+        </div>
 
-        @php
-            $role = auth()->user()->role->name;
-        @endphp
+        {{-- Назначение агента администратором --}}
+        @if($role === 'admin' && $ticket->status !== 'closed')
+            <hr>
 
-        {{-- Кнопка "Взять в работу" --}}
+            <h3>Назначить агента</h3>
+
+            <form method="POST" action="{{ route('tickets.assignAgent', $ticket) }}">
+                @csrf
+
+                <select name="agent_id" required>
+                    <option value="">— выбрать агента —</option>
+                    @foreach ($agents as $agent)
+                        <option value="{{ $agent->id }}"
+                            @selected($ticket->agent_id === $agent->id)>
+                            {{ $agent->name }}
+                        </option>
+                    @endforeach
+                </select>
+
+                <button type="submit">Назначить</button>
+            </form>
+        @endif
+
+        {{-- Взять в работу --}}
         @if(in_array($role, ['agent', 'admin']) && !$ticket->agent_id && $ticket->status !== 'closed')
+            <hr>
             <form method="POST" action="{{ route('tickets.take', $ticket) }}">
                 @csrf
                 <button type="submit">Взять в работу</button>
             </form>
-            <hr>
         @endif
 
-        {{-- Смена статуса агентом --}}
+        {{-- Смена статуса --}}
         @if(in_array($role, ['agent', 'admin']) && $ticket->status !== 'closed')
+            <hr>
             <form method="POST" action="{{ route('tickets.status', $ticket) }}">
                 @csrf
-
-                <label>Изменить статус:</label><br>
+                <label>Изменить статус</label><br>
                 <select name="status">
-                    <option value="open" @selected($ticket->status === 'open')>Открыт</option>
-                    <option value="in_progress" @selected($ticket->status === 'in_progress')>В работе</option>
-                    <option value="waiting_user" @selected($ticket->status === 'waiting_user')>Ожидает пользователя</option>
-                    <option value="closed" @selected($ticket->status === 'closed')>Закрыт</option>
+                    @foreach($statusLabels as $key => $label)
+                        <option value="{{ $key }}" @selected($ticket->status === $key)>
+                            {{ $label }}
+                        </option>
+                    @endforeach
                 </select>
-
                 <button type="submit">Сохранить</button>
             </form>
-            <hr>
         @endif
 
         {{-- Закрытие тикета пользователем --}}
         @if($role === 'user' && $ticket->status !== 'closed')
+            <hr>
             <form method="POST" action="{{ route('tickets.close', $ticket) }}">
                 @csrf
                 <button type="submit">Закрыть тикет</button>
             </form>
-            <hr>
         @endif
 
-        {{-- Переписка --}}
-        <h3>Переписка</h3>
+        {{-- Комментарии --}}
+        <div class="comments">
+            <h3>Переписка</h3>
 
-        @forelse ($ticket->comments as $comment)
-            <div style="margin-bottom: 15px;">
-                <strong>{{ $comment->user->name }}</strong>
-                <small>({{ $comment->created_at->format('d.m.Y H:i') }})</small><br>
-                {{ $comment->body }}
-            </div>
-        @empty
-            <p>Сообщений пока нет.</p>
-        @endforelse
+            @forelse ($ticket->comments as $comment)
+                <div class="comment {{ in_array($comment->user->role->name, ['agent', 'admin']) ? 'agent' : '' }}">
+                    <strong>{{ $comment->user->name }}</strong>
+                    <small>{{ $comment->created_at->format('d.m.Y H:i') }}</small>
+                    <p>{{ $comment->body }}</p>
+                </div>
+            @empty
+                <p>Сообщений пока нет.</p>
+            @endforelse
+        </div>
 
-        <hr>
-
-        {{-- Форма добавления комментария --}}
+        {{-- Форма комментария --}}
         @if($ticket->status !== 'closed')
-            <h3>Добавить сообщение</h3>
-
-            <form method="POST" action="{{ route('comments.store', $ticket) }}">
+            <hr>
+            <form class="comment-form" method="POST" action="{{ route('comments.store', $ticket) }}">
                 @csrf
-
                 <textarea name="body" rows="4" required></textarea><br><br>
-
                 <button type="submit">Отправить</button>
             </form>
         @else
-            <p><em>Тикет закрыт, добавление сообщений недоступно.</em></p>
+            <p><em>Тикет закрыт. Комментарии недоступны.</em></p>
         @endif
 
     </div>
