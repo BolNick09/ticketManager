@@ -11,4 +11,7 @@
             <li>Закрытые: {{ $closed }}</li>
         </ul>
     </div>
+    @if(auth()->user()->role->name === 'admin')
+        <a href="{{ route('admin.users') }}">Управление пользователями</a>
+    @endif
 </x-app-layout>

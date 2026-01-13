@@ -15,13 +15,13 @@ class DashboardController extends Controller
 
     $query = Ticket::query();
 
-    if ($role === 'user') {
+    if ($role === 'user') 
         $query->where('user_id', $user->id);
-    }
+    
 
-    if ($role === 'agent') {
+    if ($role === 'agent') 
         $query->where('agent_id', $user->id);
-    }
+    
 
     return view('dashboard', [
         'open' => (clone $query)->where('status', 'open')->count(),

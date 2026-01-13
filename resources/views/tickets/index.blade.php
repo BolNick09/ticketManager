@@ -18,7 +18,7 @@
                 </tr>
             </thead>
             <tbody>
-                @foreach ($tickets as $ticket)
+                @forelse  ($tickets as $ticket)
                     <tr>
                         <td>{{ $ticket->id }}</td>
                         <td>
@@ -30,7 +30,11 @@
                         <td>{{ $ticket->status }}</td>
                         <td>{{ $ticket->agent?->name ?? '—' }}</td>
                     </tr>
-                @endforeach
+                @empty
+                <tr>
+                        <td>Задач не найдено</td>
+                </tr>
+                @endforelse
             </tbody>
         </table>
 

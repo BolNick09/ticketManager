@@ -6,6 +6,7 @@ use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\TicketController;
 use App\Http\Controllers\CommentController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\AdminUserController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -61,6 +62,13 @@ Route::get('/dashboard', [DashboardController::class, 'index'])
 Route::post('/tickets/{ticket}/assign-agent', [TicketController::class, 'assignAgent'])
     ->name('tickets.assignAgent')
     ->middleware('auth');
+
+Route::middleware(['auth'])->group(function () {
+    Route::get('/admin/users', [AdminUserController::class, 'index'])->name('admin.users');
+    Route::post('/admin/users/{user}/role', [AdminUserController::class, 'updateRole'])->name('admin.users.role');
+});
+
+
 
 require __DIR__.'/auth.php';
 

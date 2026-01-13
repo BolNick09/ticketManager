@@ -16,9 +16,11 @@ class TicketController extends Controller
 
         if ($user->role->name === 'user') 
             $tickets = Ticket::where('user_id', $user->id)->get();
+        else if ($user->role->name === 'agent') 
+            $tickets = Ticket::where('agent_id', Auth::id())->get();
         else 
             $tickets = Ticket::all();
-        
+       
 
         return view('tickets.index', compact('tickets'));
     }
