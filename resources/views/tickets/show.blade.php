@@ -1,8 +1,6 @@
 
 <x-app-layout>
 
-    <link rel="stylesheet" href="{{ asset('css/ticket.css') }}">   
-
     <x-slot name="header">
         <h2>{{ $ticket->subject }}</h2>
     </x-slot>
