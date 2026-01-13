@@ -7,6 +7,7 @@
         <ul>
             <li>Открытые: {{ $open }}</li>
             <li>В работе: {{ $inProgress }}</li>
+            <li>Ожидают клиента: {{ $waiting }}</li>
             <li>Закрытые: {{ $closed }}</li>
         </ul>
     </div>

@@ -9,19 +9,25 @@ use Illuminate\Support\Facades\Auth;
 class DashboardController extends Controller
 {
     public function index()
-    {
-        $user = Auth::user();
+{
+    $user = Auth::user();
+    $role = $user->role->name;
 
-        if ($user->role->name === 'user') {
-            $tickets = Ticket::where('user_id', $user->id);
-        } else {
-            $tickets = Ticket::query();
-        }
+    $query = Ticket::query();
 
-        return view('dashboard', [
-            'open' => $tickets->where('status', 'open')->count(),
-            'inProgress' => $tickets->where('status', 'in_progress')->count(),
-            'closed' => $tickets->where('status', 'closed')->count(),
-        ]);
+    if ($role === 'user') {
+        $query->where('user_id', $user->id);
     }
+
+    if ($role === 'agent') {
+        $query->where('agent_id', $user->id);
+    }
+
+    return view('dashboard', [
+        'open' => (clone $query)->where('status', 'open')->count(),
+        'inProgress' => (clone $query)->where('status', 'in_progress')->count(),
+        'waiting' => (clone $query)->where('status', 'waiting_user')->count(),
+        'closed' => (clone $query)->where('status', 'closed')->count(),
+    ]);
+}
 }
