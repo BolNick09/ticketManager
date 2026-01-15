@@ -53,7 +53,7 @@ class TicketController extends Controller
 
     public function show(Ticket $ticket)
     {
-    $this->authorize('view', $ticket);    
+    // $this->authorize('view', $ticket);    
     $user = Auth::user();
 
         if ($user->role->name === 'user' && $ticket->user_id !== $user->id) 
