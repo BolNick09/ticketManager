@@ -8,6 +8,7 @@ use App\Models\Category;
 use Illuminate\Support\Facades\Auth;
 use App\Models\User;
 
+
 class TicketController extends Controller
 {
     public function index()
@@ -52,7 +53,8 @@ class TicketController extends Controller
 
     public function show(Ticket $ticket)
     {
-        $user = Auth::user();
+    $this->authorize('view', $ticket);    
+    $user = Auth::user();
 
         if ($user->role->name === 'user' && $ticket->user_id !== $user->id) 
             abort(403);
