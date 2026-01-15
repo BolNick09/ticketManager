@@ -10,7 +10,6 @@
                     </a>
                 </div>
 
-                {{-- Навигация --}}
                 <div class="hidden space-x-8 sm:-my-px sm:ml-10 sm:flex">
 
                     @auth
@@ -57,19 +56,34 @@
                 @endguest
 
                 @auth
-                    <div class="relative ml-3">
-                        <div>
-                            <button type="button"
-                                    class="flex text-sm rounded-full focus:outline-none"
-                                    id="user-menu-button">
-                                {{ auth()->user()->name }}
-                            </button>
-                        </div>
+                    <div class="relative" x-data="{ open: false }">
+                        <button
+                            @click="open = !open"
+                            class="flex items-center text-sm font-medium text-gray-700 focus:outline-none"
+                        >
+                            {{ auth()->user()->name }}
+                            <svg class="ml-1 h-4 w-4" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd"
+                                      d="M5.23 7.21a.75.75 0 011.06.02L10 10.94l3.71-3.71a.75.75 0 111.06 1.06l-4.24 4.24a.75.75 0 01-1.06 0L5.21 8.29a.75.75 0 01.02-1.08z"
+                                      clip-rule="evenodd" />
+                            </svg>
+                        </button>
 
-                        <div class="absolute right-0 mt-2 w-48 bg-white border rounded shadow">
+                        <div
+                            x-show="open"
+                            @click.away="open = false"
+                            x-transition
+                            class="absolute right-0 mt-2 w-48 bg-white border rounded shadow"
+                        >
+                            <a href="{{ route('profile.edit') }}"
+                               class="block px-4 py-2 text-sm hover:bg-gray-100">
+                                Профиль
+                            </a>
+
                             <form method="POST" action="{{ route('logout') }}">
                                 @csrf
-                                <button class="block w-full text-left px-4 py-2 text-sm hover:bg-gray-100">
+                                <button
+                                    class="block w-full text-left px-4 py-2 text-sm hover:bg-gray-100">
                                     Выйти
                                 </button>
                             </form>
