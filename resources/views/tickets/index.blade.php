@@ -1,42 +1,33 @@
 <x-app-layout>
     <x-slot name="header">
-        <h2>Тикеты</h2>
+        <h2 class="text-xl font-semibold">Тикеты</h2>
     </x-slot>
 
-    <div class="p-4">
+    <div class="card">
+        <a href="{{ route('tickets.create') }}" class="btn mb-4">
+            Создать тикет
+        </a>
 
-        <a href="{{ route('tickets.create') }}">➕ Создать тикет</a>
+        <table class="table">
+            <tr>
+                <th>ID</th>
+                <th>Тема</th>
+                <th>Статус</th>
+                <th></th>
+            </tr>
 
-        <table border="1" cellpadding="5" cellspacing="0" style="margin-top: 15px;">
-            <thead>
+            @foreach($tickets as $ticket)
                 <tr>
-                    <th>ID</th>
-                    <th>Тема</th>
-                    <th>Категория</th>
-                    <th>Статус</th>
-                    <th>Агент</th>
+                    <td>#{{ $ticket->id }}</td>
+                    <td>{{ $ticket->subject }}</td>
+                    <td>{{ $ticket->status }}</td>
+                    <td>
+                        <a href="{{ route('tickets.show', $ticket) }}" class="btn">
+                            Открыть
+                        </a>
+                    </td>
                 </tr>
-            </thead>
-            <tbody>
-                @forelse  ($tickets as $ticket)
-                    <tr>
-                        <td>{{ $ticket->id }}</td>
-                        <td>
-                            <a href="{{ route('tickets.show', $ticket) }}">
-                                {{ $ticket->subject }}
-                            </a>
-                        </td>
-                        <td>{{ $ticket->category->name }}</td>
-                        <td>{{ $ticket->status }}</td>
-                        <td>{{ $ticket->agent?->name ?? '—' }}</td>
-                    </tr>
-                @empty
-                <tr>
-                        <td>Задач не найдено</td>
-                </tr>
-                @endforelse
-            </tbody>
+            @endforeach
         </table>
-
     </div>
 </x-app-layout>

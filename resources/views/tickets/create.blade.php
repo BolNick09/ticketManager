@@ -1,16 +1,21 @@
 <x-app-layout>
     <x-slot name="header">
-        <h2>Новый тикет</h2>
+        <h2 class="text-xl font-semibold">Создать тикет</h2>
     </x-slot>
 
-    <div class="p-4">
+    <div class="card">
         <form method="POST" action="{{ route('tickets.store') }}">
             @csrf
 
-            <div>
-                <label>Категория</label><br>
-                <select name="category_id" required>
-                    @foreach ($categories as $category)
+            <div class="mb-4">
+                <label>Тема</label>
+                <input type="text" name="subject" class="w-full border p-2">
+            </div>
+
+            <div class="mb-4">
+                <label>Категория</label>
+                <select name="category_id">
+                    @foreach($categories as $category)
                         <option value="{{ $category->id }}">
                             {{ $category->name }}
                         </option>
@@ -18,17 +23,12 @@
                 </select>
             </div>
 
-            <div>
-                <label>Тема</label><br>
-                <input type="text" name="subject" required>
+            <div class="mb-4">
+                <label>Описание</label>
+                <textarea name="description" rows="5"></textarea>
             </div>
 
-            <div>
-                <label>Описание</label><br>
-                <textarea name="description" required></textarea>
-            </div>
-
-            <button type="submit">Создать</button>
+            <button class="btn">Создать</button>
         </form>
     </div>
 </x-app-layout>
